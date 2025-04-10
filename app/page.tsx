@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import { TextField, Button, Container, Typography, Card, CardContent, List, ListItem, ListItemText, CircularProgress, Grid, Box, Tooltip, IconButton, Alert, FormControlLabel, Checkbox, Skeleton } from '@mui/material';
+import { TextField, Button, Container, Typography, Card, CardContent, List, ListItem, ListItemText, CircularProgress, Grid, Box, Tooltip, IconButton, Alert, FormControlLabel, Checkbox, Skeleton, Paper } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
-import { getWeatherRecommendations, WeatherRecommendation } from './api/weather';
+import { styled } from '@mui/material/styles';
+import { useRouter } from 'next/navigation';
+import { getWeatherRecommendations } from './api/weather';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
@@ -16,6 +18,8 @@ import CloudIcon from '@mui/icons-material/Cloud';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import React from 'react';
+import { RecommendationCard } from './components/RecommendationCard';
+import SearchHistory from './components/SearchHistory';
 
 // Helper function to convert Celsius to Fahrenheit
 const celsiusToFahrenheit = (celsius?: number): number | undefined => {
@@ -70,6 +74,62 @@ interface UserCoordinates {
   lon: number;
 }
 
+const getWeatherImage = (description: string, temperature: number): string => {
+  const isDay = temperature > 15;
+  const weatherMap: { [key: string]: string } = {
+    'clear sky': isDay ? 'sun' : 'moon',
+    'few clouds': isDay ? 'partly-cloudy-day' : 'partly-cloudy-night',
+    'scattered clouds': 'cloudy',
+    'broken clouds': 'cloudy',
+    'shower rain': 'rain',
+    'rain': 'rain',
+    'thunderstorm': 'thunderstorm',
+    'snow': 'snow',
+    'mist': 'fog',
+  };
+
+  const iconCode = weatherMap[description.toLowerCase()] || 'sun';
+  return `https://cdn.jsdelivr.net/gh/erikflowers/weather-icons@2.0.0/svg/${iconCode}.svg`;
+};
+
+const StyledRecommendationCard = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  marginBottom: theme.spacing(2),
+  position: 'relative',
+  overflow: 'hidden',
+  minHeight: '180px',
+  display: 'flex',
+  flexDirection: 'column',
+  borderRadius: '16px',
+  background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%)',
+  backdropFilter: 'blur(10px)',
+  boxShadow: '0 8px 32px rgba(31, 38, 135, 0.15)',
+  border: '1px solid rgba(255, 255, 255, 0.18)',
+  color: 'white',
+  transition: 'all 0.3s ease-in-out',
+  '&:hover': {
+    transform: 'translateY(-4px)',
+    boxShadow: '0 12px 48px rgba(31, 38, 135, 0.25)',
+  },
+  '& > *': {
+    position: 'relative',
+    zIndex: 1,
+  },
+}));
+
+interface WeatherRecommendation {
+  date: string;
+  timeOfDay: string;
+  temperature: number;
+  description: string;
+  location: string;
+  clothing: string[];
+  notes?: string;
+  recommendation?: string;
+  purchaseLink?: string;
+  weatherImage?: string;
+}
+
 export default function Home() {
   const [location, setLocation] = useState('');
   const [recommendations, setRecommendations] = useState<WeatherRecommendation[]>([]);
@@ -90,6 +150,8 @@ export default function Home() {
   
   // Store geoPosition in a ref for direct access to avoid state timing issues
   const geoPosition = useRef<GeolocationPosition | null>(null);
+  
+  const router = useRouter();
   
   // Setup intersection observer for infinite scroll
   useEffect(() => {
@@ -268,6 +330,25 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        if (!response.ok) {
+          router.push('/login');
+        }
+      } catch (error) {
+        router.push('/login');
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  const handleHistorySelect = (historicalRecommendations: WeatherRecommendation[]) => {
+    setRecommendations(historicalRecommendations);
+  };
+
   return (
     <Container maxWidth="sm" style={{ marginTop: '2rem', paddingBottom: '2rem' }}>
       <Typography variant="h4" component="h1" gutterBottom align="center">
@@ -330,7 +411,6 @@ export default function Home() {
                     value={endDate}
                     onChange={(newValue) => setEndDate(newValue)}
                     slotProps={{ textField: { fullWidth: true } }}
-                    minDate={startDate || undefined}
                   />
                 </Box>
               </Box>
@@ -353,7 +433,7 @@ export default function Home() {
       {useMyLocation && userCoordinates && !error && (
         <Card elevation={1} sx={{ mb: 2, mt: 1, p: 1, bgcolor: 'success.light' }}>
           <Typography variant="body2" sx={{ color: 'white' }}>
-            Successfully detected your location coordinates. Click "Get Recommendations" to see your forecast.
+            Successfully detected your location coordinates.
           </Typography>
         </Card>
       )}
@@ -405,56 +485,137 @@ export default function Home() {
                 ))
               ) : (
                 // Show actual recommendations with lazy loading
-                displayedRecommendations.map((recommendationItem, index) => (
-                  <LazyLoadComponent
-                    key={index}
-                    placeholder={
-                      <Box sx={{ py: 2 }}>
-                        <Box sx={{ display: 'flex', width: '100%', alignItems: 'center', mb: 1 }}>
-                          <Skeleton variant="circular" width={40} height={40} sx={{ mr: 2 }} />
-                          <Skeleton variant="text" width="60%" height={24} />
-                          <Box sx={{ ml: 'auto' }}>
-                            <Skeleton variant="text" width={80} height={20} />
+                displayedRecommendations.map((rec, index) => (
+                  <StyledRecommendationCard key={index}>
+                    <Box sx={{ 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      gap: 1.5,
+                      width: '100%',
+                      position: 'relative'
+                    }}>
+                      <Box sx={{ 
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        width: '60px',
+                        height: '60px',
+                        backgroundImage: rec.weatherImage ? `url(${rec.weatherImage})` : 'none',
+                        backgroundSize: 'contain',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat',
+                        filter: 'brightness(1.2)',
+                      }} />
+                      
+                      <Box sx={{ textAlign: 'left', mb: 1 }}>
+                        <Box sx={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center',
+                          mb: 1.5
+                        }}>
+                          <Box sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 0.5
+                          }}>
+                            <Typography variant="body2" sx={{ 
+                              color: 'rgba(255, 255, 255, 0.9)',
+                              textTransform: 'uppercase',
+                              letterSpacing: '1px',
+                              fontSize: '0.875rem',
+                              fontWeight: 500
+                            }}>
+                              {dayjs(rec.date).format('MMM D, YYYY')}
+                            </Typography>
+                            <Typography variant="body2" sx={{ 
+                              color: 'rgba(255, 255, 255, 0.8)',
+                              textTransform: 'uppercase',
+                              letterSpacing: '1px',
+                              fontSize: '0.75rem',
+                            }}>
+                              {rec.timeOfDay}
+                            </Typography>
                           </Box>
                         </Box>
-                        <Skeleton variant="text" width="90%" height={20} sx={{ ml: 7 }} />
-                      </Box>
-                    }
-                    visibleByDefault={index < 3} // Always show the first 3 items immediately
-                  >
-                    <ListItem 
-                      divider={index < recommendations.length - 1}
-                      sx={{ 
-                        display: 'flex', 
-                        flexDirection: 'column', 
-                        alignItems: 'flex-start',
-                        py: 2
-                      }}
-                    >
-                      <Box sx={{ display: 'flex', width: '100%', alignItems: 'center', mb: 1 }}>
-                        <Box sx={{ mr: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: '50%', bgcolor: 'background.paper', boxShadow: 1 }}>
-                          {getTemperatureIcon(recommendationItem.temperature)}
+                        <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                          <Typography variant="h3" sx={{ 
+                            fontWeight: 200,
+                            fontSize: '3rem',
+                            lineHeight: 1
+                          }}>
+                            {rec.temperature}°
+                          </Typography>
+                          <Typography variant="body2" sx={{ 
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            fontSize: '0.875rem'
+                          }}>
+                            H:{celsiusToFahrenheit(rec.temperature)?.toFixed(0) || '--'}° L:{Math.round(celsiusToFahrenheit(rec.temperature - 10) || 0)}°
+                          </Typography>
                         </Box>
-                        <Typography variant="subtitle1">
-                          {new Date(recommendationItem.date).toLocaleDateString()} {new Date(recommendationItem.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - {getTimeOfDay(recommendationItem.date)} - {
-                            recommendationItem.temperature 
-                              ? `${recommendationItem.temperature.toFixed(1)}°C / ${celsiusToFahrenheit(recommendationItem.temperature)?.toFixed(1)}°F` 
-                              : ''
-                          }
+                        <Typography variant="subtitle1" sx={{ 
+                          fontWeight: 400,
+                          color: 'rgba(255, 255, 255, 0.9)',
+                          mt: 0.5
+                        }}>
+                          {rec.description}
                         </Typography>
-                        <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center' }}>
-                          <Tooltip title={getTemperatureDescription(recommendationItem.temperature)}>
-                            <Typography variant="subtitle2" color="text.secondary" sx={{ ml: 1 }}>
-                              {getTemperatureDescription(recommendationItem.temperature)}
-                            </Typography>
-                          </Tooltip>
-                        </Box>
                       </Box>
-                      <Typography variant="body1" sx={{ pl: 7 }}>
-                        {recommendationItem.recommendation}
-                      </Typography>
-                    </ListItem>
-                  </LazyLoadComponent>
+
+                      <Box sx={{ 
+                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
+                        backdropFilter: 'blur(10px)',
+                        padding: '16px',
+                        borderRadius: '16px',
+                        mt: 'auto',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                      }}>
+                        <Typography variant="body1" sx={{ 
+                          color: 'rgba(255, 255, 255, 0.95)',
+                          fontWeight: 500,
+                          lineHeight: 1.5,
+                          fontSize: '1rem',
+                          '&::before': {
+                            content: '"👕 "',
+                            marginRight: '4px',
+                            fontSize: '1.1rem'
+                          }
+                        }}>
+                          {rec.recommendation}
+                        </Typography>
+                      </Box>
+
+                      {rec.purchaseLink && (
+                        <Button 
+                          variant="contained" 
+                          href={rec.purchaseLink} 
+                          target="_blank"
+                          size="small"
+                          sx={{ 
+                            mt: 2,
+                            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                            color: 'white',
+                            borderRadius: '20px',
+                            textTransform: 'none',
+                            fontWeight: 500,
+                            padding: '6px 20px',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            alignSelf: 'flex-start',
+                            '&:hover': {
+                              backgroundColor: 'rgba(255, 255, 255, 0.3)',
+                              transform: 'translateY(-1px)',
+                              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)'
+                            },
+                            transition: 'all 0.2s ease-in-out'
+                          }}
+                        >
+                          Shop this outfit
+                        </Button>
+                      )}
+                    </Box>
+                  </StyledRecommendationCard>
                 ))
               )}
             </List>
@@ -499,6 +660,8 @@ export default function Home() {
           </CardContent>
         </Card>
       )}
+      
+      <SearchHistory onSelectHistory={handleHistorySelect} />
     </Container>
   );
 }

@@ -3,9 +3,15 @@ import axios from 'axios';
 // Define interfaces for better type safety
 export interface WeatherRecommendation {
   date: string;
-  recommendation: string;
-  temperature?: number;
-  location?: string;
+  timeOfDay: string;
+  temperature: number;
+  description: string;
+  location: string;
+  clothing: string[];
+  notes?: string;
+  recommendation?: string;
+  purchaseLink?: string;
+  weatherImage?: string;
 }
 
 // Function to interpret location description using AI
