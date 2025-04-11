@@ -1,36 +1,113 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Weather App with AI Recommendations
 
-## Getting Started
+Modern web application that provides weather and clothing recommendations powered by AI.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- 🎯 Location-based weather search
+- 🤖 AI-generated clothing recommendations
+- 📱 Modern and responsive interface
+- 🔐 User authentication
+- 📊 Search history
+- 🌡️ Real-time weather data
+
+## Tech Stack
+
+- **Frontend**: Next.js 14, TypeScript, Material-UI
+- **Backend**: Next.js API Routes
+- **Database**: PostgreSQL
+- **AI**: OpenAI API
+- **Weather**: OpenWeather API
+- **Deployment**: DigitalOcean App Platform
+
+## Requirements
+
+- Node.js 18+
+- PostgreSQL
+- OpenAI Account
+- OpenWeather Account
+- DigitalOcean Account
+
+## Environment Variables
+
+```env
+NEXT_PUBLIC_OPENWEATHER_API_KEY=your_openweather_api_key
+NEXT_PUBLIC_OPENAI_API_KEY=your_openai_api_key
+DB_HOST=your_db_host
+DB_PORT=your_db_port
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_NAME=your_db_name
+JWT_SECRET=your_jwt_secret
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/weather-app.git
+cd weather-app
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Install dependencies:
+```bash
+npm install
+```
 
-## Learn More
+3. Configure environment variables:
+```bash
+cp .env.example .env.local
+# Edit .env.local with your credentials
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Initialize the database:
+```bash
+psql -U your_user -d your_db -f init.sql
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. Start the development server:
+```bash
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+weather-app/
+├── app/
+│   ├── api/              # API Routes
+│   ├── components/       # React Components
+│   ├── lib/             # Utilities
+│   └── styles/          # Global Styles
+├── public/              # Static Files
+├── .env.example         # Environment Variables Example
+├── .gitignore
+├── next.config.js
+├── package.json
+└── README.md
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Create a DigitalOcean account
+2. Install doctl and authenticate
+3. Configure environment variables in DigitalOcean
+4. Deploy using App Platform
+
+```bash
+doctl apps create --spec .do/app.yaml
+```
+
+## Contributing
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+
