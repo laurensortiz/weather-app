@@ -1,15 +1,20 @@
 import { Pool, QueryResult, QueryResultRow } from 'pg';
 
-export const databasePool = new Pool({
-  user: process.env.DB_USER || 'weather_user',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'weather_app',
-  password: process.env.DB_PASSWORD || 'w34th3r',
-  port: parseInt(process.env.DB_PORT || '5432'),
-  max: 20, // Maximum number of clients in the pool
-  idleTimeoutMillis: 30000, // How long a client is allowed to remain idle before being closed
-  connectionTimeoutMillis: 2000, // How long to wait for a connection to be established
-});
+const poolConfig = {
+  user: process.env.DB_USER,
+  host: process.env.DB_HOST,
+  database: process.env.DB_NAME,
+  password: process.env.DB_PASSWORD,
+  port: Number(process.env.DB_PORT),
+  ssl: {
+    rejectUnauthorized: false
+  },
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
+};
+
+export const databasePool = new Pool(poolConfig);
 
 // Define tipos para los resultados de consultas comunes
 export interface UserRecord {
