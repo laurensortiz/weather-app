@@ -6,6 +6,12 @@ const poolConfig = {
   database: process.env.DB_NAME,
   password: process.env.DB_PASSWORD,
   port: Number(process.env.DB_PORT),
+  ssl: {
+    rejectUnauthorized: false,
+    ca: process.env.DB_CA_CERT,
+    key: process.env.DB_CLIENT_KEY,
+    cert: process.env.DB_CLIENT_CERT
+  },
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
