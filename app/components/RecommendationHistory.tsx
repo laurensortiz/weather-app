@@ -58,43 +58,24 @@ export const RecommendationHistory: React.FC<RecommendationHistoryProps> = ({
             <HistoryItem>
               <ListItemText
                 primary={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="subtitle1">
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                       {recommendation.location}
                     </Typography>
-                    <Chip
-                      label={`${recommendation.temperature}°C`}
-                      size="small"
-                      color="primary"
-                    />
+                    <Typography variant="body2" color="text.secondary">
+                      {new Date(recommendation.date).toLocaleDateString()}
+                    </Typography>
                   </Box>
                 }
                 secondary={
-                  <>
-                    <Typography variant="body2" color="text.secondary">
-                      {new Date(recommendation.date).toLocaleDateString()}
+                  <Box sx={{ mt: 1 }}>
+                    <Typography variant="body2">
+                      Temperature: {recommendation.temperature}°C
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {recommendation.weatherDescription}
                     </Typography>
-                    <Box sx={{ mt: 1 }}>
-                      {recommendation.recommendations.slice(0, 2).map((rec, i) => (
-                        <Chip
-                          key={i}
-                          label={rec}
-                          size="small"
-                          sx={{ mr: 1, mb: 1 }}
-                        />
-                      ))}
-                      {recommendation.recommendations.length > 2 && (
-                        <Chip
-                          label={`+${recommendation.recommendations.length - 2} more`}
-                          size="small"
-                          variant="outlined"
-                        />
-                      )}
-                    </Box>
-                  </>
+                  </Box>
                 }
               />
             </HistoryItem>
