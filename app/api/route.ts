@@ -5,12 +5,12 @@ import OpenAI from 'openai';
 import { verifyToken } from './auth/auth';
 
 // API key should be stored in environment variables
-const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || '';
+const OPENWEATHER_API_KEY = process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY || '';
 const OPENWEATHER_BASE_URL = 'https://api.openweathermap.org/data/2.5/forecast';
 
 // Initialize OpenAI with API key
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY || '',
 });
 
 // Database connection configuration
@@ -319,14 +319,13 @@ async function getWeatherRecommendationsByCoords(request: Request, lat: number, 
         lat: lat,
         lon: lon,
         appid: OPENWEATHER_API_KEY,
-        units: 'metric',
-      },
+        units: 'metric'
+      }
     });
 
     const weatherForecastData = weatherApiResponse.data;
-    const cityName = weatherForecastData.city?.name || `Location (${lat.toFixed(2)}, ${lon.toFixed(2)})`;
     
-    let clothingRecommendations = await Promise.all(weatherForecastData.list.map(async (dailyForecast: any): Promise<WeatherRecommendation> => {
+    let clothingRecommendations = await Promise.all(weatherForecastData.list.map(async (dailyForecast: any) => {
       const temperatureCelsius = dailyForecast.main.temp;
       const weatherDescription = dailyForecast.weather[0].description;
       let clothingRecommendation = 'Wear something comfortable';
@@ -343,7 +342,7 @@ async function getWeatherRecommendationsByCoords(request: Request, lat: number, 
         clothingRecommendation = 'T-shirt and shorts, it will be hot!';
       }
 
-      const shoppingLink = await generateShoppingLink(cityName, clothingRecommendation);
+      const shoppingLink = await generateShoppingLink(lat + ',' + lon, clothingRecommendation);
       const weatherImage = await getWeatherImage(weatherDescription, temperatureCelsius);
 
       return {
@@ -351,7 +350,7 @@ async function getWeatherRecommendationsByCoords(request: Request, lat: number, 
         timeOfDay: getTimeOfDay(dailyForecast.dt_txt),
         temperature: temperatureCelsius,
         description: weatherDescription,
-        location: cityName,
+        location: `${lat},${lon}`,
         clothing: [clothingRecommendation],
         recommendation: clothingRecommendation,
         purchaseLink: shoppingLink,
@@ -362,7 +361,7 @@ async function getWeatherRecommendationsByCoords(request: Request, lat: number, 
     // Filter recommendations by date range if provided
     if (startDate || endDate) {
       const startDateObj = startDate ? new Date(startDate) : new Date(0);
-      const endDateObj = endDate ? new Date(endDate) : new Date(3000, 0, 1); // Far future date
+      const endDateObj = endDate ? new Date(endDate) : new Date(3000, 0, 1);
       
       clothingRecommendations = clothingRecommendations.filter((item: WeatherRecommendation) => {
         const itemDate = new Date(item.date);
@@ -381,7 +380,7 @@ async function getWeatherRecommendationsByCoords(request: Request, lat: number, 
       
       const searchResult = await databasePool.query(
         'INSERT INTO searches (user_id, location, recommendations, start_date, end_date, latitude, longitude) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id',
-        [userId, cityName, JSON.stringify(clothingRecommendations), startDate, endDate, lat, lon]
+        [userId, `${lat},${lon}`, JSON.stringify(clothingRecommendations), startDate, endDate, lat, lon]
       );
 
       // Save individual recommendations
