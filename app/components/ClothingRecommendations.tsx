@@ -4,7 +4,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
   Chip,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
@@ -19,6 +18,13 @@ const RecommendationCard = styled(Card)(({ theme }) => ({
     transform: 'scale(1.02)',
   },
 }));
+
+const GridContainer = styled('div')({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+  gap: '16px',
+  width: '100%',
+});
 
 interface ClothingItem {
   category: string;
@@ -54,9 +60,9 @@ export const ClothingRecommendations: React.FC<ClothingRecommendationsProps> = (
       <Typography variant="h6" gutterBottom>
         Clothing Recommendations
       </Typography>
-      <Grid container spacing={2}>
+      <GridContainer>
         {recommendations.map((recommendation, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
+          <div key={index}>
             <RecommendationCard>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -78,9 +84,9 @@ export const ClothingRecommendations: React.FC<ClothingRecommendationsProps> = (
                 </Box>
               </CardContent>
             </RecommendationCard>
-          </Grid>
+          </div>
         ))}
-      </Grid>
+      </GridContainer>
     </Box>
   );
 }; 
