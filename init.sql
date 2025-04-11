@@ -15,6 +15,8 @@ CREATE TABLE IF NOT EXISTS searches (
     recommendations JSONB,
     start_date DATE,
     end_date DATE,
+    latitude DECIMAL(9,6),
+    longitude DECIMAL(9,6),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
