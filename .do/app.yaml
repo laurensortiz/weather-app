@@ -4,7 +4,7 @@ services:
     git:
       branch: main
       repo_clone_url: https://github.com/laurensortiz/weather-app.git
-    build_command: npm run build
+    build_command: npm install && npm run build
     run_command: npm start
     envs:
       - key: NEXT_PUBLIC_OPENWEATHER_API_KEY
