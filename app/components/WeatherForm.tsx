@@ -92,7 +92,14 @@ export function WeatherForm({ onWeatherData }: WeatherFormProps) {
       </Collapse>
 
       <Collapse in={showHistory}>
-        <SearchHistory />
+        <SearchHistory onSelectHistory={(recommendations) => {
+          if (recommendations.length > 0) {
+            const lastRecommendation = recommendations[0];
+            setLocation(lastRecommendation.location);
+            setDate(new Date(lastRecommendation.date));
+            setShowHistory(false);
+          }
+        }} />
       </Collapse>
     </Box>
   );
