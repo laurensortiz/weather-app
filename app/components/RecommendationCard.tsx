@@ -1,9 +1,10 @@
 import React from 'react';
-import { Card, CardContent, Typography, Box, Button, Chip } from '@mui/material';
+import { Card, CardContent, Typography, Box, Button, Chip, List, ListItem } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Image from 'next/image';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
+import { format } from 'date-fns';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -41,91 +42,46 @@ const ImageGridItem = styled('div')(({ theme }) => ({
   },
 }));
 
-interface RecommendationCardProps {
-  date: string;
+interface Recommendation {
+  id: number;
+  location: string;
+  date: Date;
   temperature: number;
-  recommendation: string;
-  imageUrl?: string;
-  purchaseLink?: string;
+  weatherDescription: string;
+  recommendations: string[];
 }
 
-export const RecommendationCard: React.FC<RecommendationCardProps> = ({
-  date,
-  temperature,
-  recommendation,
-  imageUrl,
-  purchaseLink,
-}) => {
-  const formattedDate = new Date(date).toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+interface RecommendationCardProps {
+  recommendation: Recommendation;
+}
 
-  const timeOfDay = new Date(date).toLocaleTimeString('en-US', {
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-
+export const RecommendationCard = ({ recommendation }: RecommendationCardProps) => {
   return (
-    <LazyLoadComponent>
-      <StyledCard>
-        <CardContent>
-          <GridContainer>
-            <GridItem>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="h6" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-                  {formattedDate}
-                  <TemperatureChip
-                    label={`${temperature.toFixed(1)}°C`}
-                    size="small"
-                  />
-                </Typography>
-                <Typography color="text.secondary" variant="body2">
-                  {timeOfDay}
-                </Typography>
-              </Box>
-              <Typography variant="body1" paragraph>
-                {recommendation}
-              </Typography>
-              {purchaseLink && (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  href={purchaseLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  sx={{ mt: 2 }}
-                >
-                  Shop this look
-                </Button>
-              )}
-            </GridItem>
-            {imageUrl && (
-              <ImageGridItem>
-                <Box
-                  sx={{
-                    position: 'relative',
-                    width: '100%',
-                    height: 200,
-                    borderRadius: 1,
-                    overflow: 'hidden',
-                  }}
-                >
-                  <Image
-                    src={imageUrl}
-                    alt="Outfit recommendation"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
-                  />
-                </Box>
-              </ImageGridItem>
-            )}
-          </GridContainer>
-        </CardContent>
-      </StyledCard>
-    </LazyLoadComponent>
+    <Card sx={{ mb: 2 }}>
+      <CardContent>
+        <Typography variant="h6" gutterBottom>
+          {recommendation.location}
+        </Typography>
+        <Typography color="textSecondary" gutterBottom>
+          {format(new Date(recommendation.date), 'PPP')}
+        </Typography>
+        <Typography variant="h5" gutterBottom>
+          {recommendation.temperature.toFixed(1)}°C
+        </Typography>
+        <Typography color="textSecondary" gutterBottom>
+          {recommendation.weatherDescription}
+        </Typography>
+        <Typography variant="subtitle1" gutterBottom>
+          Recommendations:
+        </Typography>
+        <List>
+          {recommendation.recommendations.map((rec, index) => (
+            <ListItem key={index}>
+              <Typography>{rec}</Typography>
+            </ListItem>
+          ))}
+        </List>
+      </CardContent>
+    </Card>
   );
 }; 

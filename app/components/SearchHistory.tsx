@@ -87,8 +87,8 @@ export default function SearchHistory({ onSelectHistory }: SearchHistoryProps) {
           </Typography>
           
           {history.length === 0 ? (
-            <Typography variant="body2" color="text.secondary">
-              No hay búsquedas previas
+            <Typography variant="body1" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+              No previous searches
             </Typography>
           ) : (
             history.map((item) => (
