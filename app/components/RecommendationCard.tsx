@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, CardContent, Typography, Box, Button, Grid, Chip } from '@mui/material';
+import { Card, CardContent, Typography, Box, Button, Chip } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import Image from 'next/image';
 import { LazyLoadComponent } from 'react-lazy-load-image-component';
@@ -18,6 +18,27 @@ const TemperatureChip = styled(Chip)(({ theme }) => ({
   marginLeft: theme.spacing(1),
   backgroundColor: theme.palette.primary.main,
   color: theme.palette.primary.contrastText,
+}));
+
+const GridContainer = styled('div')({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+  gap: '16px',
+  width: '100%',
+});
+
+const GridItem = styled('div')(({ theme }) => ({
+  width: '100%',
+  [theme.breakpoints.up('md')]: {
+    width: '66.666667%',
+  },
+}));
+
+const ImageGridItem = styled('div')(({ theme }) => ({
+  width: '100%',
+  [theme.breakpoints.up('md')]: {
+    width: '33.333333%',
+  },
 }));
 
 interface RecommendationCardProps {
@@ -51,8 +72,8 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
     <LazyLoadComponent>
       <StyledCard>
         <CardContent>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={imageUrl ? 8 : 12}>
+          <GridContainer>
+            <GridItem>
               <Box sx={{ mb: 2 }}>
                 <Typography variant="h6" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
                   {formattedDate}
@@ -80,9 +101,9 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                   Shop this look
                 </Button>
               )}
-            </Grid>
+            </GridItem>
             {imageUrl && (
-              <Grid item xs={12} md={4}>
+              <ImageGridItem>
                 <Box
                   sx={{
                     position: 'relative',
@@ -100,9 +121,9 @@ export const RecommendationCard: React.FC<RecommendationCardProps> = ({
                     sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
                   />
                 </Box>
-              </Grid>
+              </ImageGridItem>
             )}
-          </Grid>
+          </GridContainer>
         </CardContent>
       </StyledCard>
     </LazyLoadComponent>
