@@ -20,6 +20,9 @@ const databasePool = new Pool({
   database: process.env.DB_NAME || 'weather_app',
   password: process.env.DB_PASSWORD || 'w34th3r',
   port: parseInt(process.env.DB_PORT || '5432'),
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 interface WeatherRecommendation {
