@@ -1,0 +1,25 @@
+name: weather-app
+services:
+  - name: web
+    git:
+      branch: main
+      repo_clone_url: https://github.com/laurensortiz/weather-app.git
+    build_command: npm run build
+    run_command: npm start
+    envs:
+      - key: NEXT_PUBLIC_OPENWEATHER_API_KEY
+        value: ${NEXT_PUBLIC_OPENWEATHER_API_KEY}
+      - key: NEXT_PUBLIC_OPENAI_API_KEY
+        value: ${NEXT_PUBLIC_OPENAI_API_KEY}
+      - key: DB_USER
+        value: ${DB_USER}
+      - key: DB_HOST
+        value: ${DB_HOST}
+      - key: DB_NAME
+        value: ${DB_NAME}
+      - key: DB_PASSWORD
+        value: ${DB_PASSWORD}
+      - key: DB_PORT
+        value: ${DB_PORT}
+    instance_size_slug: basic-xxs
+    instance_count: 1 
