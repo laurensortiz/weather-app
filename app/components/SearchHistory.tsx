@@ -83,7 +83,7 @@ export default function SearchHistory({ onSelectHistory }: SearchHistoryProps) {
           borderRadius: '16px',
         }}>
           <Typography variant="h6" gutterBottom>
-            Historial de Búsquedas
+            Search History
           </Typography>
           
           {history.length === 0 ? (

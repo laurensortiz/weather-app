@@ -4,7 +4,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Grid,
   Chip,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
@@ -18,6 +17,13 @@ const WeatherCard = styled(Card)(({ theme }) => ({
     transform: 'scale(1.02)',
   },
 }));
+
+const GridContainer = styled('div')({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+  gap: '16px',
+  width: '100%',
+});
 
 interface WeatherData {
   datetime: string;
@@ -48,9 +54,9 @@ export const WeatherForecast: React.FC<WeatherForecastProps> = ({ forecast }) =>
       <Typography variant="h6" gutterBottom>
         Weather Forecast
       </Typography>
-      <Grid container spacing={2}>
+      <GridContainer>
         {forecast.map((weather, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
+          <div key={index}>
             <WeatherCard>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -70,9 +76,9 @@ export const WeatherForecast: React.FC<WeatherForecastProps> = ({ forecast }) =>
                 </Typography>
               </CardContent>
             </WeatherCard>
-          </Grid>
+          </div>
         ))}
-      </Grid>
+      </GridContainer>
     </Box>
   );
 }; 

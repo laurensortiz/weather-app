@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     
     const { userId } = verifyToken(token);
 
-    // Obtener historial de búsquedas
+    // Get search history
     const searchHistory = await executeQuery(
       `SELECT 
         s.id,
