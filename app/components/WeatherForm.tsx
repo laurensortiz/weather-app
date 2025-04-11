@@ -7,26 +7,32 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { useWeatherRecommendations } from '../hooks/useWeather';
 import { RecommendationCard } from './RecommendationCard';
-import { SearchHistory } from './SearchHistory';
+import SearchHistory from './SearchHistory';
 import HistoryIcon from '@mui/icons-material/History';
 
-export function WeatherForm() {
-  const [location, setLocation] = useState('');
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
-  const [isFormValid, setIsFormValid] = useState(false);
-  const [showHistory, setShowHistory] = useState(false);
+interface WeatherFormProps {
+  onWeatherData: (data: any) => void;
+}
 
-  const { data: recommendations, isLoading, isSuccess, error } = useWeatherRecommendations(
-    location,
-    startDate?.toISOString().split('T')[0],
-    endDate?.toISOString().split('T')[0]
-  );
+export function WeatherForm({ onWeatherData }: WeatherFormProps) {
+  const [location, setLocation] = useState('');
+  const [date, setDate] = useState<Date | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const { getWeatherRecommendations, loading, error } = useWeatherRecommendations();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!location || !date) return;
+
+    const weatherData = await getWeatherRecommendations(location, date.toISOString());
+    if (weatherData) {
+      onWeatherData(weatherData);
+    }
+  };
 
   const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setLocation(value);
-    setIsFormValid(value.trim() !== '');
   };
 
   return (
@@ -58,22 +64,16 @@ export function WeatherForm() {
             fullWidth
             required
           />
-          <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <LocalizationProvider dateAdapter={AdapterDateFns as any}>
             <DatePicker
-              label="Start Date"
-              value={startDate}
-              onChange={(newValue) => setStartDate(newValue)}
-              slotProps={{ textField: { fullWidth: true } }}
-            />
-            <DatePicker
-              label="End Date"
-              value={endDate}
-              onChange={(newValue) => setEndDate(newValue)}
+              label="Date"
+              value={date}
+              onChange={(newValue) => setDate(newValue)}
               slotProps={{ textField: { fullWidth: true } }}
             />
           </LocalizationProvider>
 
-          {isLoading && (
+          {loading && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
               <CircularProgress />
             </Box>
@@ -81,23 +81,13 @@ export function WeatherForm() {
 
           {error && (
             <Typography color="error" sx={{ mt: 2 }}>
-              Error: {error.message}
+              Error: {error}
             </Typography>
           )}
 
-          {isSuccess && recommendations && recommendations.length > 0 && (
-            <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {recommendations.map((recommendation, index) => (
-                <RecommendationCard key={index} recommendation={recommendation} />
-              ))}
-            </Box>
-          )}
-
-          {isSuccess && (!recommendations || recommendations.length === 0) && (
-            <Typography sx={{ mt: 4, textAlign: 'center', color: 'text.secondary' }}>
-              No recommendations found for this location and date range.
-            </Typography>
-          )}
+          <Button type="submit" variant="contained" onClick={handleSubmit}>
+            Get Recommendations
+          </Button>
         </Box>
       </Collapse>
 
